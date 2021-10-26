@@ -8,7 +8,7 @@ export default function LoaderSpinner() {
       color="#3f51b5"
       height={100}
       width={100}
-      timeout={3000} //3 secs
+      timeout={2000} //2 secs
     />
   );
 }
