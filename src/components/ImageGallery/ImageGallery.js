@@ -1,5 +1,5 @@
 import s from "./ImageGallery.module.css";
-import { Component } from "react";
+import { useEffect, useState } from "react";
 import { FetchObject } from "../Services/pixabay";
 import { ImageGalleryItem } from "../ImageGalleryItem/ImageGalleryItem";
 import { Button } from "..//Button/Button";
@@ -8,75 +8,62 @@ const base_url = `https://pixabay.com/api/`;
 const api_key = `23194515-4229c06a71e7a36cb0b196559`;
 const newFetchObject = new FetchObject(base_url, api_key);
 
-export class ImageGallery extends Component {
-  state = {
-    searchResults: [],
-  };
-  componentDidMount() {
-    // this.scrollToBottom();
-  }
+export function ImageGallery({ searchValue, perPage, onImageClick }) {
+  const [searchResults, setSearchResults] = useState([]);
+  const [error, setError] = useState(null);
 
-  componentDidUpdate(prevProps, prevState) {
-    if (
-      prevProps.searchValue !== this.props.searchValue ||
-      prevProps.perPage !== this.props.perPage
-    ) {
-      newFetchObject.resetPage();
-      newFetchObject.query = this.props.searchValue;
-      newFetchObject.perPage = this.props.perPage;
-      newFetchObject
-        .searchPhotos()
-        .then((searchResults) => {
-          this.setState({ searchResults });
-        })
-        .catch((err) => {
-          console.log(err);
-        });
-    }
-    if (newFetchObject.page !== 1) {
-      this.scrollToBottom();
-    }
-  }
-
-  handleClick = () => {
-    newFetchObject.page = 1;
+  useEffect(() => {
+    if (!searchValue.trim()) return;
+    newFetchObject.resetPage();
+    newFetchObject.query = searchValue;
+    newFetchObject.perPage = perPage;
     newFetchObject
       .searchPhotos()
       .then((searchResults) => {
-        this.setState((prev) => ({
-          searchResults: [...prev.searchResults, ...searchResults],
-        }));
+        setSearchResults(searchResults);
       })
       .catch((err) => {
+        setError(error);
         console.log(err);
       });
-  };
+  }, [searchValue, perPage, setSearchResults, error]);
 
-  scrollToBottom = () => {
+  if (newFetchObject.page !== 1) {
     setTimeout(() => {
       window.scrollTo({
         top: document.documentElement.scrollHeight,
         behavior: "smooth",
       });
     });
+  }
+
+  const handleClick = () => {
+    newFetchObject.page = 1;
+    newFetchObject
+      .searchPhotos()
+      .then((searchResults) => {
+        setSearchResults((prev) => [...prev, ...searchResults]);
+      })
+      .catch((err) => {
+        setError(error);
+        console.log(err);
+      });
   };
 
-  render() {
-    const { searchResults } = this.state;
-    return (
-      <>
-        <ul className={s.ImageGallery}>
-          {searchResults.map((el) => (
+  return (
+    <>
+      <ul className={s.ImageGallery}>
+        {searchResults.length > 0 &&
+          searchResults.map((el) => (
             <ImageGalleryItem
               key={el.id}
               image={el}
               src={el.largeImageURL}
-              onImageClick={this.props.onImageClick}
+              onImageClick={onImageClick}
             />
           ))}
-        </ul>
-        {searchResults.length >= 12 && <Button onClick={this.handleClick} />}
-      </>
-    );
-  }
+      </ul>
+      {searchResults.length >= 12 && <Button onClick={handleClick} />}
+    </>
+  );
 }

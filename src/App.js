@@ -1,66 +1,56 @@
 import "./App.css";
-import { Component } from "react";
+import { useState, useEffect } from "react";
+import { useToggle } from "./hooks/useToggle";
 import { SearchBar } from "./components/Searchbar/SearchBar";
 import { ImageGallery } from "./components/ImageGallery/ImageGallery";
 import { Modal } from "./components/Modal/Modal";
 import LoaderSpinner from "./components/Loader/Loader";
 
-class App extends Component {
-  state = {
-    images: [],
-    searchValue: "",
-    largeImage: "",
-    perPage: 12,
-    showModal: false,
-    isLoading: false,
+function App() {
+  const [images, setImages] = useState([]);
+  const [searchValue, setSearchValue] = useState("");
+  const [perPage, setPerPage] = useState(12);
+  const [largeImage, setLargeImage] = useState("");
+  const [showModal, setShowModal] = useToggle(false);
+  const [isLoading, setIsLoading] = useToggle(false);
+
+  useEffect(
+    (prevState) => {
+      if (prevState !== images) {
+        setImages(images);
+      }
+    },
+    [images, setImages]
+  );
+
+  const getSearchValues = ({ searchValue, perPage }) => {
+    setIsLoading(!isLoading);
+    setSearchValue(searchValue);
+    setPerPage(perPage);
   };
 
-  componentDidUpdate(prevProps, prevState) {
-    // this.setState({ isLoading: !this.state.isLoading });
-    if (prevState.images !== this.state.images) {
-      this.setState(this.state.images);
-    }
-    // if (prevState.isLoading !== this.state.isLoading) {
-    //   this.setState(this.state.isLoading);
-    // }
-  }
-
-  toggleModal = () => {
-    this.setState({ showModal: !this.state.showModal });
+  const onImageClick = (largeImageURL) => {
+    setLargeImage(largeImageURL);
+    setShowModal(!showModal);
   };
 
-  onImageClick = (largeImageURL) => {
-    this.setState({ largeImage: largeImageURL });
-    this.toggleModal();
-  };
+  return (
+    <div className="App">
+      <SearchBar getSearchValues={getSearchValues} />
 
-  getSearchValues = (searchValue, perPage) => {
-    // this.setState({ isLoading: !this.state.isLoading });
-    this.setState({ searchValue, perPage, isLoading: !this.state.isLoading });
-  };
+      <ImageGallery
+        searchValue={searchValue}
+        perPage={perPage}
+        onImageClick={onImageClick}
+      />
+      {isLoading && <LoaderSpinner />}
 
-  render() {
-    const { searchValue, perPage, showModal, largeImage, isLoading } =
-      this.state;
-
-    return (
-      <div className="App">
-        <SearchBar getSearchValues={this.getSearchValues} />
-        {isLoading && <LoaderSpinner />}
-
-        <ImageGallery
-          searchValue={searchValue}
-          perPage={perPage}
-          onImageClick={this.onImageClick}
-        />
-
-        {showModal && (
-          <Modal toggleModal={this.toggleModal}>
-            <img src={largeImage} alt="" />
-          </Modal>
-        )}
-      </div>
-    );
-  }
+      {showModal && (
+        <Modal toggleModal={setShowModal}>
+          <img src={largeImage} alt="" />
+        </Modal>
+      )}
+    </div>
+  );
 }
 export default App;
