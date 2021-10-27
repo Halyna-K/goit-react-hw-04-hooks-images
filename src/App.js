@@ -23,10 +23,10 @@ function App() {
     [images, setImages]
   );
 
-  const getSearchValues = ({ searchValue, perPage, isLoading }) => {
-    if (!setSearchValue(searchValue)) return setIsLoading(!isLoading);
+  const getSearchValues = ({ searchValue, perPage }) => {
     setSearchValue(searchValue);
     setPerPage(perPage);
+    if (!setSearchValue(searchValue)) return setIsLoading(!isLoading);
   };
 
   const onImageClick = (largeImageURL) => {
