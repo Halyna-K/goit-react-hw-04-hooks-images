@@ -28,26 +28,29 @@ export function ImageGallery({ searchValue, perPage, onImageClick }) {
       });
   }, [searchValue, perPage, setSearchResults, error]);
 
-  if (newFetchObject.page !== 1) {
-    setTimeout(() => {
-      window.scrollTo({
-        top: document.documentElement.scrollHeight,
-        behavior: "smooth",
-      });
-    });
-  }
-
   const handleClick = () => {
     newFetchObject.page = 1;
     newFetchObject
       .searchPhotos()
       .then((searchResults) => {
         setSearchResults((prev) => [...prev, ...searchResults]);
+        if (newFetchObject.page !== 1) {
+          scrollToBottom();
+        }
       })
       .catch((err) => {
         setError(error);
         console.log(err);
       });
+  };
+
+  const scrollToBottom = () => {
+    setTimeout(() => {
+      window.scrollTo({
+        top: document.documentElement.scrollHeight,
+        behavior: "smooth",
+      });
+    });
   };
 
   return (

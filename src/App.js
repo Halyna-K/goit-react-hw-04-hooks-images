@@ -23,8 +23,8 @@ function App() {
     [images, setImages]
   );
 
-  const getSearchValues = ({ searchValue, perPage }) => {
-    setIsLoading(!isLoading);
+  const getSearchValues = ({ searchValue, perPage, isLoading }) => {
+    if (!setSearchValue(searchValue)) return setIsLoading(!isLoading);
     setSearchValue(searchValue);
     setPerPage(perPage);
   };
@@ -37,13 +37,13 @@ function App() {
   return (
     <div className="App">
       <SearchBar getSearchValues={getSearchValues} />
+      {isLoading && <LoaderSpinner />}
 
       <ImageGallery
         searchValue={searchValue}
         perPage={perPage}
         onImageClick={onImageClick}
       />
-      {isLoading && <LoaderSpinner />}
 
       {showModal && (
         <Modal toggleModal={setShowModal}>
